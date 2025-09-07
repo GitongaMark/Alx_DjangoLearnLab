@@ -17,16 +17,18 @@ librarian1, _ = Librarian.objects.get_or_create(name="John Doe", library=library
 
 
 # --- Queries ---
-# 1. Query all books by a specific author
+
+# 1. Query all books by a specific author (using filter)
 author_name = "Chinua Achebe"
 author = Author.objects.get(name=author_name)
+books_by_author = Book.objects.filter(author=author)   # <-- required line
 print(f"Books by {author_name}:")
-for book in author.books.all():
+for book in books_by_author:
     print(f"- {book.title} ({book.publication_year})")
 
 # 2. List all books in a library
 library_name = "Central Library"
-library = Library.objects.get(name=library_name)   # <-- required line
+library = Library.objects.get(name=library_name)
 print(f"\nBooks in {library_name}:")
 for book in library.books.all():
     print(f"- {book.title} by {book.author.name}")
