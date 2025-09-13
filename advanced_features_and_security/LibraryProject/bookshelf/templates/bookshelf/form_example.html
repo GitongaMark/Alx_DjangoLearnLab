@@ -17,15 +17,12 @@
     <h1>📖 Add a New Book</h1>
 
     <!-- ✅ CSRF token is REQUIRED here -->
-    <form method="post">
-        {% csrf_token %}  <!-- ⚠️ CRITICAL: Protects against CSRF attacks -->
-
-        {{ form.as_p }}
-
-        <button type="submit">Add Book</button>
-    </form>
-
-    <a href="{% url 'book_list' %}">← Back to Book List</a>
+   <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+</form>
+<a href="{% url 'book_list' %}">Back to Books</a>
     
 </body>
 </html>
