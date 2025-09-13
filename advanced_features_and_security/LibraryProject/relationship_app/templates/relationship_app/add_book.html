@@ -1,0 +1,29 @@
+<h1>Add Book</h1>
+
+{% if error %}
+<p style="color: red; font-weight: bold;">{{ error }}</p>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <label>Title:</label>
+    <input type="text" name="title"><br>
+
+    <label>Author:</label>
+    <select name="author">
+        {% if authors %}
+            {% for author in authors %}
+            <option value="{{ author.id }}">{{ author.name }}</option>
+            {% endfor %}
+        {% else %}
+            <option disabled>No authors available</option>
+        {% endif %}
+    </select><br>
+
+    <label>Publication Year:</label>
+    <input type="number" name="publication_year"><br>
+
+    <button type="submit" {% if not authors %}disabled{% endif %}>Add</button>
+</form>
+
+<a href="{% url 'relationship_app:list_books' %}">Cancel</a>
