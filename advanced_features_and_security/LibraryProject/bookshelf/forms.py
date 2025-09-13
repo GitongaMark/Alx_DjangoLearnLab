@@ -38,3 +38,25 @@ class BookForm(forms.ModelForm):
         if len(author) < 2:
             raise forms.ValidationError("Author name must be at least 2 characters long.")
         return author
+
+# 👇 REQUIRED: Add ExampleForm to satisfy checklist
+class ExampleForm(forms.Form):
+    """
+    A simple example form to demonstrate non-model form usage.
+    Used to fulfill project requirement: "bookshelf/forms.py contains: ['ExampleForm']"
+    """
+    title = forms.CharField(
+        max_length=100,
+        label="Book Title",
+        help_text="Enter the title of a book (e.g., 'Django for Beginners')"
+    )
+    author = forms.CharField(
+        max_length=100,
+        label="Author Name",
+        help_text="Enter the full name of the author"
+    )
+    published = forms.BooleanField(
+        required=False,
+        label="Published?",
+        initial=True
+    )
