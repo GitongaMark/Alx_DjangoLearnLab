@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import permission_required
 from django.contrib import messages
 from .models import Book
 from .forms import BookForm
+from .forms import ExampleForm
 
 def book_list(request):
     books = Book.objects.all()  # ✅ ORM query — parameterized, safe
@@ -13,15 +14,16 @@ def book_list(request):
 
 def form_example(request):
     if request.method == 'POST':
-        form = BookForm(request.POST)
+        form = ExampleForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Book added successfully!")
-            return redirect('book_list')
-        else:
-            messages.error(request, "Please correct the errors below.")
+            # Do something with cleaned_data (e.g., save to DB or print)
+            title = form.cleaned_data['title']
+            author = form.cleaned_data['author']
+            year = form.cleaned_data['publication_year']
+            print(f"Added: {title} by {author} ({year})")
+            # In real app, you'd save to database here
     else:
-        form = BookForm()
+        form = ExampleForm()
 
     return render(request, 'bookshelf/form_example.html', {'form': form})
 
