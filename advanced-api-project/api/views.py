@@ -23,17 +23,53 @@ class BookListView(generics.ListCreateAPIView):
           return [permissions.IsAuthenticated()]
         return [permissions.AllowAny()]
 
-class BookDetailView(generics.RetrieveUpdateDestroyAPIView):
+class BookCreateView(generics.CreateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
 
-class AuthorListView(generics.ListCreateAPIView):
+
+class BookDetailView(generics.RetrieveAPIView):
+    queryset = Book.objects.select_related('author').all()
+    serializer_class = BookSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class BookUpdateView(generics.UpdateAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class BookDeleteView(generics.DestroyAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class AuthorListView(generics.ListAPIView):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.AllowAny]
 
-class AuthorDetailView(generics.RetrieveUpdateDestroyAPIView):
+class AuthorCreateView(generics.CreateAPIView):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class AuthorDetailView(generics.RetrieveAPIView):
+    queryset = Author.objects.prefetch_related('books').all()
+    serializer_class = AuthorSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class AuthorUpdateView(generics.UpdateAPIView):
+    queryset = Author.objects.all()
+    serializer_class = AuthorSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class AuthorDeleteView(generics.DestroyAPIView):
+    queryset = Author.objects.all()
+    serializer_class = AuthorSerializer
+    permission_classes = [permissions.IsAuthenticated]
