@@ -1,0 +1,39 @@
+{% extends 'templates/base.html' %}
+{% block content %}
+<article>
+  <h1>{{ object.title }}</h1>
+  <p>By {{ object.author }} — {{ object.published_date }}</p>
+  <div>{{ object.content|linebreaks }}</div>
+  {% if object.tags.all %}
+    <p>Tags: {% for t in object.tags.all %}<a href="{% url 'blog:posts-by-tag' t.name %}">{{ t.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+  {% endif %}
+</article>
+
+<section id="comments">
+  <h2>Comments</h2>
+  {% for c in comments %}
+    <div>
+      <p>{{ c.author }} — {{ c.created_at }}</p>
+      <p>{{ c.content|linebreaks }}</p>
+      {% if user == c.author %}
+        <a href="{% url 'blog:edit-comment' c.id %}">Edit</a>
+        <a href="{% url 'blog:delete-comment' c.id %}">Delete</a>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p>No comments yet.</p>
+  {% endfor %}
+</section>
+
+{% if user.is_authenticated %}
+  <section id="add-comment">
+    <form method="post" action="{% url 'blog:add-comment' object.pk %}">
+      {% csrf_token %}
+      {{ comment_form.as_p }}
+      <button type="submit">Post comment</button>
+    </form>
+  </section>
+{% else %}
+  <p><a href="{% url 'blog:login' %}?next={{ request.path }}">Log in</a> to comment.</p>
+{% endif %}
+{% endblock %}
