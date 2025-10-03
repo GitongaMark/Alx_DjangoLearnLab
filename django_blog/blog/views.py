@@ -1,0 +1,121 @@
+from django.shortcuts import render
+
+# Create your views here.
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .forms import CustomUserCreationForm, CommentForm, PostForm
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from .models import Post
+from django.db.models import Q
+from taggit.models import Tag
+
+def register(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+
+        else:
+            form = CustomUserCreationForm()
+        
+        return render(request, 'register.html', {'form': form})
+
+@login_required
+def profile(request):
+    if request.method == 'POST':
+       request.user.email = request.POST.get('email')
+       request.user.save()
+       return redirect('profile')
+    
+    return render(request, 'profile.html')
+
+class PostListView(ListView):
+    model = Post
+    template_name = 'post_list.html'
+    context_object_name = 'posts'
+    ordering = ['-published_date']
+
+class PostDetailView(DetailView):
+    model = Post
+    template_name = 'post_detail.html'
+
+class PostCreateView(LoginRequiredMixin, CreateView):
+    model = Post
+    form_class = PostForm
+    fields = ['title', 'content']
+    template_name = 'post_form.html'
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Post
+    form_class = PostForm
+    template_name = 'post_form.html'
+    fields = ['title', 'content']
+
+    def test_func(self):
+        post = self.get_object()
+        return self.request.user == post.author
+
+class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Post
+    success_url = '/'
+
+    def test_func(self):
+        post = self.get_object()
+        return self.request.user == post.author
+
+def add_comment(request, pk):
+    post = Post.objects.get(pk=pk)
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = post
+            comment.author = request.user
+            comment.save()
+            return redirect('post-detail', pk=post.pk)
+    else:
+        form = CommentForm()
+    return render(request, 'comment/comment_form.html', {'form': form, 'post': post})
+
+@login_required
+def edit_comment(request, pk):
+    comment = Comment.objects.get(pk=pk)
+    if request.user != comment.author:
+        return redirect('post-detail', pk=comment.post.pk)
+    if request.method == 'POST':
+        form = CommentForm(request.POST, instance=comment)
+        if form.is_valid():
+            form.save()
+            return redirect('post-detail', pk=comment.post.pk)
+    else:
+        form = CommentForm(instance=comment)
+    return render(request, 'comment/comment_form.html', {'form': form})
+
+@login_required
+def delete_comment(request, pk):
+    comment = Comment.objects.get(pk=pk)
+    if request.user == comment.author:
+        comment.delete()
+    return redirect('post-detail', pk=comment.post.pk)
+
+def search_posts(request):
+    query = request.GET.get('q')
+    posts = Post.objects.none()
+    if query:
+        posts = Post.objects.filter(
+            Q(title__icontains=query) |
+            Q(content__icontains=query) |
+            Q(tags__name__icontains=query)
+        ).distinct()
+    return render(request, 'search_results.html', {'posts': posts, 'query': query})
+
+def posts_by_tag(request, tag_slug):
+    tag = Tag.objects.get(slug=tag_slug)
+    posts = Post.objects.filter(tags=tag)
+    return render(request, 'post_list.html', {'posts': posts, 'tag': tag})
