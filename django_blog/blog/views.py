@@ -93,13 +93,12 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         post = self.get_object()
         return self.request.user == post.author
 
-
 # ===== COMMENT CLASS-BASED VIEWS =====
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
-    template_name = 'blog/comment/comment_form.html'
+    template_name = 'comment/comment_form.html'
 
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -113,7 +112,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Comment
     form_class = CommentForm
-    template_name = 'blog/comment/comment_form.html'
+    template_name = 'comment/comment_form.html'
 
     def test_func(self):
         comment = self.get_object()
@@ -121,11 +120,10 @@ class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def get_success_url(self):
         return self.object.post.get_absolute_url()
-
 
 class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Comment
-    template_name = 'blog/comment/comment_confirm_delete.html'
+    template_name = 'comment/comment_confirm_delete.html'
 
     def test_func(self):
         comment = self.get_object()
@@ -133,9 +131,6 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def get_success_url(self):
         return self.object.post.get_absolute_url()
-
-
-# ===== TAGGING & SEARCH VIEWS =====
 
 def search_posts(request):
     query = request.GET.get('q')
